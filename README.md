@@ -1,6 +1,6 @@
-# <img src="Anticia/Assets.xcassets/AppIcon.appiconset/Icon-1024.png" alt="Anticia app icon" width="36" align="center"> Anticia
+# <img src="Anticia/Assets.xcassets/AppIcon.appiconset/Icon-1024.png" alt="Anticia app icon" width="36" align="center" style="border-radius: 8px;"> Anticia
 
-Anticia is a SwiftUI countdown app for tracking upcoming events, milestones, trips, birthdays, deadlines, and completed countdowns. It uses SwiftData for local persistence, SwiftUI Observation for view models, and local notifications to alert users when a countdown starts.
+Anticia is a SwiftUI countdown app for tracking upcoming events, milestones, trips, birthdays, deadlines, and completed countdowns. It uses SwiftData for local persistence, SwiftUI Observation for view models, WidgetKit for Home Screen and Lock Screen widgets, and local notifications to alert users when a countdown starts.
 
 ## Get Anticia for iPhone and iPad
 
@@ -10,13 +10,17 @@ Anticia is a SwiftUI countdown app for tracking upcoming events, milestones, tri
   </a>
 </div>
 
-Install Anticia from the App Store to track events, trips, birthdays, deadlines, and completed countdowns.
+Install Anticia from the App Store to track events, trips, birthdays, deadlines, completed countdowns, and glanceable widgets.
 
 ## Screenshots
 
-| Upcoming                                                                       | Calendar                                                                       | Timeline                                                                       |
+|                                                                                |                                                                                |                                                                                |
 | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
 | <img src="Screenshots/upcoming.png" alt="Anticia Upcoming screen" width="260"> | <img src="Screenshots/calendar.png" alt="Anticia Calendar screen" width="260"> | <img src="Screenshots/timeline.png" alt="Anticia Timeline screen" width="260"> |
+
+|                                                                                              |                                                                                              |
+| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| <img src="Screenshots/widget-home-screen.png" alt="Anticia Home Screen widgets" width="260"> | <img src="Screenshots/widget-lock-screen.png" alt="Anticia Lock Screen widgets" width="260"> |
 
 ## Features
 
@@ -48,12 +52,24 @@ Install Anticia from the App Store to track events, trips, birthdays, deadlines,
 - Timed countdowns notify at the selected date and time.
 - Pending notifications are rescheduled after edits and canceled after deletes or completion.
 
+### Widgets
+
+- Home Screen widgets in small, medium, and large sizes.
+- Lock Screen widgets in circular, rectangular, and inline styles.
+- Small and medium widgets show the next upcoming countdown.
+- Large widgets show a compact list of upcoming countdowns.
+- Widgets use each countdown's selected color theme and deep link back into Anticia.
+- Widget data is exported through the shared app group and refreshed after countdown changes.
+- Widget timelines refresh when countdown dates pass and at the next daily boundary.
+
 ## Tech Stack
 
 - Swift 6
 - SwiftUI
 - SwiftData
 - Observation framework
+- WidgetKit
+- App Groups
 - UserNotifications
 - Xcode string catalogs
 - iOS 17.0+
@@ -64,30 +80,20 @@ The app does not use third-party frameworks.
 
 ```text
 Anticia/
-├── App/
-│   ├── AnticiaApp.swift
-│   └── RootTabView.swift
-├── Components/
-│   ├── CalendarMonthView.swift
-│   ├── CountdownRing.swift
-│   ├── EventRow.swift
-│   └── GlassCard.swift
-├── Features/
-│   ├── Calendar/
-│   ├── Completed/
-│   ├── Detail/
-│   ├── Editor/
-│   ├── Settings/
-│   ├── Timeline/
-│   └── Upcoming/
-├── Localization/
-│   └── L10n.swift
-├── Models/
-├── Notifications/
-├── Persistence/
-├── Resources/
-│   └── Localizable.xcstrings
-└── Utilities/
+├── Anticia/
+│   ├── App/
+│   ├── Components/
+│   ├── Features/
+│   ├── Localization/
+│   ├── Models/
+│   ├── Notifications/
+│   ├── Persistence/
+│   ├── Resources/
+│   ├── Utilities/
+│   └── Widgets/
+├── AnticiaWidgets/
+├── ProjectSupport/
+└── Screenshots/
 ```
 
 ## Architecture
@@ -100,6 +106,9 @@ Anticia follows a lightweight MVVM structure:
 - View models handle filtering, grouping, summary text, and other derived state.
 - Persistence operations are centralized in `PersistenceController`.
 - Notification scheduling is handled by `CountdownNotificationScheduler`.
+- Widget snapshots are exported by `CountdownWidgetSnapshotStore` into the shared app group.
+- Widget timeline and display state are handled by `CountdownWidgetViewModel`.
+- Widget rendering lives in the `AnticiaWidgets` extension.
 
 The project has Main Actor default actor isolation enabled.
 
