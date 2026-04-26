@@ -19,6 +19,9 @@ struct AnticiaApp: App {
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
                 try? PersistenceController.sharedModelContainer.mainContext.save()
+                CountdownWidgetSnapshotStore.exportSnapshots(
+                    from: PersistenceController.sharedModelContainer.mainContext
+                )
             }
         }
     }

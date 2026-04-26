@@ -5,87 +5,93 @@ import SwiftData
 struct RootTabView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
+    @Query(sort: [SortDescriptor(\CountdownEntity.targetDate, order: .forward)])
+    private var events: [CountdownEntity]
     @AppStorage("appAppearance") private var appAppearance = AppAppearance.system.rawValue
-    @State private var selectedTab: RootTab = .upcoming
-    @State private var editorEvent: CountdownEntity?
-    @State private var isPresentingEditor = false
-    @State private var currentDate = Date()
+    @State private var viewModel = RootTabViewModel()
 
     var body: some View {
-        tabContent
-            .sheet(isPresented: $isPresentingEditor, onDismiss: { editorEvent = nil }, content: {
+        @Bindable var viewModel = viewModel
+
+        return tabContent(selectedTab: $viewModel.selectedTab)
+            .sheet(isPresented: $viewModel.isPresentingEditor, onDismiss: viewModel.dismissEditor, content: {
                 NavigationStack {
-                    EventEditorView(event: editorEvent)
+                    EventEditorView(event: viewModel.editorEvent)
                 }
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
             })
-            .preferredColorScheme(selectedColorScheme)
+            .sheet(item: $viewModel.deepLinkedEvent) { event in
+                NavigationStack {
+                    EventDetailView(event: event)
+                }
+            }
+            .preferredColorScheme(viewModel.selectedColorScheme(for: appAppearance))
             .tint(Color(hex: "2E6CF6"))
             .onAppear {
-                currentDate = .now
-                completeExpiredEvents()
+                refreshCountdownState()
             }
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {
-                    currentDate = .now
-                    completeExpiredEvents()
+                    refreshCountdownState()
                 }
             }
             .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
-                currentDate = .now
-                completeExpiredEvents()
+                refreshCountdownState()
+            }
+            .onOpenURL { url in
+                viewModel.handleDeepLink(url, events: events)
             }
     }
 
     @ViewBuilder
-    private var tabContent: some View {
+    private func tabContent(selectedTab: Binding<RootTab>) -> some View {
         if #available(iOS 18.0, *) {
-            modernTabContent
+            modernTabContent(selectedTab: selectedTab)
         } else {
-            legacyTabContent
+            legacyTabContent(selectedTab: selectedTab)
         }
     }
 
     @available(iOS 18.0, *)
-    private var modernTabContent: some View {
-        TabView(selection: $selectedTab) {
+    private func modernTabContent(selectedTab: Binding<RootTab>) -> some View {
+        TabView(selection: selectedTab) {
             Tab(String(localized: L10n.upcoming), systemImage: RootTab.upcoming.icon, value: .upcoming) {
                 NavigationStack {
-                    UpcomingView(now: currentDate, onAddTapped: presentCreateFlow)
+                    UpcomingView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
                 }
             }
 
             Tab(String(localized: L10n.calendar), systemImage: RootTab.calendar.icon, value: .calendar) {
                 NavigationStack {
-                    CalendarView(now: currentDate, onAddTapped: presentCreateFlow)
+                    CalendarView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
                 }
             }
 
             Tab(String(localized: L10n.timeline), systemImage: RootTab.timeline.icon, value: .timeline) {
                 NavigationStack {
-                    TimelineView(now: currentDate, onAddTapped: presentCreateFlow)
+                    TimelineView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
                 }
             }
 
             Tab(String(localized: L10n.completed), systemImage: RootTab.completed.icon, value: .completed) {
                 NavigationStack {
-                    CompletedView(now: currentDate, onAddTapped: presentCreateFlow)
+                    CompletedView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
                 }
             }
 
             Tab(String(localized: L10n.settings), systemImage: RootTab.settings.icon, value: .settings) {
                 NavigationStack {
-                    SettingsView(onAddTapped: presentCreateFlow)
+                    SettingsView(onAddTapped: viewModel.presentCreateFlow)
                 }
             }
         }
     }
 
-    private var legacyTabContent: some View {
-        TabView(selection: $selectedTab) {
+    private func legacyTabContent(selectedTab: Binding<RootTab>) -> some View {
+        TabView(selection: selectedTab) {
             NavigationStack {
-                UpcomingView(now: currentDate, onAddTapped: presentCreateFlow)
+                UpcomingView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
             }
             .tabItem {
                 Label(String(localized: L10n.upcoming), systemImage: RootTab.upcoming.icon)
@@ -93,7 +99,7 @@ struct RootTabView: View {
             .tag(RootTab.upcoming)
 
             NavigationStack {
-                CalendarView(now: currentDate, onAddTapped: presentCreateFlow)
+                CalendarView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
             }
             .tabItem {
                 Label(String(localized: L10n.calendar), systemImage: RootTab.calendar.icon)
@@ -101,7 +107,7 @@ struct RootTabView: View {
             .tag(RootTab.calendar)
 
             NavigationStack {
-                TimelineView(now: currentDate, onAddTapped: presentCreateFlow)
+                TimelineView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
             }
             .tabItem {
                 Label(String(localized: L10n.timeline), systemImage: RootTab.timeline.icon)
@@ -109,7 +115,7 @@ struct RootTabView: View {
             .tag(RootTab.timeline)
 
             NavigationStack {
-                CompletedView(now: currentDate, onAddTapped: presentCreateFlow)
+                CompletedView(now: viewModel.currentDate, onAddTapped: viewModel.presentCreateFlow)
             }
             .tabItem {
                 Label(String(localized: L10n.completed), systemImage: RootTab.completed.icon)
@@ -117,7 +123,7 @@ struct RootTabView: View {
             .tag(RootTab.completed)
 
             NavigationStack {
-                SettingsView(onAddTapped: presentCreateFlow)
+                SettingsView(onAddTapped: viewModel.presentCreateFlow)
             }
             .tabItem {
                 Label(String(localized: L10n.settings), systemImage: RootTab.settings.icon)
@@ -126,39 +132,9 @@ struct RootTabView: View {
         }
     }
 
-    private var selectedColorScheme: ColorScheme? {
-        AppAppearance(rawValue: appAppearance)?.colorScheme
-    }
-
-    private func presentCreateFlow() {
-        editorEvent = nil
-        isPresentingEditor = true
-    }
-
-    private func completeExpiredEvents() {
+    private func refreshCountdownState() {
+        viewModel.refreshDate()
         PersistenceController.completeExpiredEvents(in: modelContext)
-    }
-}
-
-private enum RootTab: Hashable {
-    case upcoming
-    case calendar
-    case timeline
-    case completed
-    case settings
-
-    var icon: String {
-        switch self {
-        case .upcoming:
-            return "sparkles"
-        case .calendar:
-            return "calendar"
-        case .timeline:
-            return "list.bullet.rectangle.portrait"
-        case .completed:
-            return "checkmark.seal"
-        case .settings:
-            return "gearshape"
-        }
+        CountdownWidgetSnapshotStore.exportSnapshots(from: modelContext, now: viewModel.currentDate)
     }
 }

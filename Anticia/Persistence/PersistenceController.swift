@@ -59,6 +59,7 @@ enum PersistenceController {
         }
 
         try? context.save()
+        CountdownWidgetSnapshotStore.exportSnapshots(from: context)
         return savedEvent
     }
 
@@ -75,12 +76,14 @@ enum PersistenceController {
 
         if didUpdate {
             try? context.save()
+            CountdownWidgetSnapshotStore.exportSnapshots(from: context, now: now)
         }
     }
 
     static func mark(_ event: CountdownEntity, completed: Bool, in context: ModelContext) {
         event.isCompleted = completed
         try? context.save()
+        CountdownWidgetSnapshotStore.exportSnapshots(from: context)
 
         if completed {
             CountdownNotificationScheduler.cancelStartNotification(for: event.wrappedID)
@@ -95,5 +98,6 @@ enum PersistenceController {
         CountdownNotificationScheduler.cancelStartNotification(for: event.wrappedID)
         context.delete(event)
         try? context.save()
+        CountdownWidgetSnapshotStore.exportSnapshots(from: context)
     }
 }
