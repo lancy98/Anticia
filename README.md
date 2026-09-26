@@ -1,4 +1,4 @@
-# <img src="Anticia/Assets.xcassets/AppIcon.appiconset/Icon-1024.png" alt="Anticia app icon" width="36" align="center" style="border-radius: 8px;"> Anticia
+# <img src="README-icon.png" alt="Anticia app icon" width="72" align="absmiddle"> Anticia
 
 Anticia is a SwiftUI countdown app for tracking upcoming events, milestones, trips, birthdays, deadlines, and completed countdowns. It uses SwiftData for local persistence, SwiftUI Observation for view models, WidgetKit for Home Screen and Lock Screen widgets, and local notifications to alert users when a countdown starts.
 
