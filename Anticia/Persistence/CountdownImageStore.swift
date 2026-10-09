@@ -67,6 +67,62 @@ enum CountdownImageStore {
         }
     }
 
+    /// WidgetKit archives the bitmap itself, including pixels outside a SwiftUI crop.
+    /// Prepare only the visible crop at the widget's display size before archiving it.
+    static func renderedBackground(
+        appearance: CountdownAppearance, size: CGSize, displayScale: CGFloat
+    ) -> UIImage? {
+        guard appearance.hasImage, let name = appearance.imageName,
+              size.width.isFinite, size.height.isFinite, size.width > 0, size.height > 0,
+              displayScale.isFinite, displayScale > 0
+        else { return nil }
+
+        let image: UIImage?
+        if appearance.backgroundKind == .photo {
+            guard let url = photoURL(named: name),
+                  let source = CGImageSourceCreateWithURL(url as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary),
+                  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                  let width = properties[kCGImagePropertyPixelWidth] as? CGFloat,
+                  let height = properties[kCGImagePropertyPixelHeight] as? CGFloat
+            else { return nil }
+
+            let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
+            let sourceSize = (5...8).contains(orientation)
+                ? CGSize(width: height, height: width) : CGSize(width: width, height: height)
+            let renderedSize = CountdownImageLayout.renderedSize(
+                imageSize: sourceSize, containerSize: size, scale: appearance.imageScale
+            )
+            let maximumPixelSize = ceil(max(renderedSize.width, renderedSize.height) * displayScale)
+            guard let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                kCGImageSourceCreateThumbnailFromImageAlways: true,
+                kCGImageSourceCreateThumbnailWithTransform: true,
+                kCGImageSourceThumbnailMaxPixelSize: maximumPixelSize,
+                kCGImageSourceShouldCacheImmediately: true
+            ] as CFDictionary) else { return nil }
+            image = UIImage(cgImage: thumbnail)
+        } else {
+            image = self.image(named: name, kind: appearance.backgroundKind)
+        }
+
+        guard let image else { return nil }
+        let renderedSize = CountdownImageLayout.renderedSize(
+            imageSize: image.size, containerSize: size, scale: appearance.imageScale
+        )
+        let origin = CGPoint(
+            x: (size.width - renderedSize.width) * CountdownImageLayout.clampedPosition(appearance.imagePositionX),
+            y: (size.height - renderedSize.height) * CountdownImageLayout.clampedPosition(appearance.imagePositionY)
+        )
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = displayScale
+        format.opaque = true
+        format.preferredRange = .standard
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            image.draw(in: CGRect(origin: origin, size: renderedSize))
+        }
+    }
+
     static func removePhoto(named name: String) {
         cache.removeObject(forKey: name as NSString)
         guard let url = photoURL(named: name) else { return }

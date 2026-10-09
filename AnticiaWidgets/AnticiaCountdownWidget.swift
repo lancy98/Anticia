@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import WidgetKit
 
 struct AnticiaCountdownWidget: Widget {
@@ -28,16 +29,35 @@ private struct CountdownTimelineProvider: TimelineProvider {
 
     func getSnapshot(in context: Context, completion: @escaping (CountdownTimelineEntry) -> Void) {
         let now = Date()
-        completion(CountdownWidgetViewModel.snapshotEntry(date: now, snapshots: loadSnapshots()))
+        let entry = CountdownWidgetViewModel.snapshotEntry(date: now, snapshots: loadSnapshots())
+        completion(preparingBackground(for: entry, in: context))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<CountdownTimelineEntry>) -> Void) {
         let now = Date()
         let snapshots = loadSnapshots()
-        let entry = CountdownWidgetViewModel.timelineEntry(date: now, snapshots: snapshots)
+        let entry = preparingBackground(
+            for: CountdownWidgetViewModel.timelineEntry(date: now, snapshots: snapshots), in: context
+        )
         let nextRefresh = CountdownWidgetViewModel.nextRefreshDate(for: entry.snapshots, relativeTo: now)
 
         completion(Timeline(entries: [entry], policy: .after(nextRefresh)))
+    }
+
+    private func preparingBackground(for entry: CountdownTimelineEntry, in context: Context) -> CountdownTimelineEntry {
+        switch context.family {
+        case .systemSmall, .systemMedium, .systemLarge:
+            guard let snapshot = entry.snapshots.first else { return entry }
+            let displayScale = context.environmentVariants.displayScale?.max() ?? 3
+            return CountdownTimelineEntry(
+                date: entry.date, snapshots: entry.snapshots,
+                backgroundImage: CountdownImageStore.renderedBackground(
+                    appearance: snapshot.appearance, size: context.displaySize, displayScale: displayScale
+                )
+            )
+        default:
+            return entry
+        }
     }
 
     private func loadSnapshots() -> [CountdownWidgetSnapshot] {
@@ -54,6 +74,7 @@ private struct CountdownTimelineProvider: TimelineProvider {
 struct CountdownTimelineEntry: TimelineEntry {
     let date: Date
     let snapshots: [CountdownWidgetSnapshot]
+    var backgroundImage: UIImage? = nil
 }
 
 private struct CountdownWidgetEntryView: View {
@@ -67,11 +88,11 @@ private struct CountdownWidgetEntryView: View {
         Group {
             switch family {
             case .systemSmall:
-                SmallCountdownWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date)
+                SmallCountdownWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date, backgroundImage: entry.backgroundImage)
             case .systemMedium:
-                MediumCountdownWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date)
+                MediumCountdownWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date, backgroundImage: entry.backgroundImage)
             case .systemLarge:
-                LargeCountdownWidget(viewModel: viewModel)
+                LargeCountdownWidget(viewModel: viewModel, backgroundImage: entry.backgroundImage)
             case .accessoryCircular:
                 CircularLockWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date)
             case .accessoryRectangular:
@@ -79,7 +100,7 @@ private struct CountdownWidgetEntryView: View {
             case .accessoryInline:
                 InlineLockWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date)
             default:
-                SmallCountdownWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date)
+                SmallCountdownWidget(snapshot: viewModel.primarySnapshot, now: viewModel.date, backgroundImage: entry.backgroundImage)
             }
         }
         .widgetURL(viewModel.widgetURL)
@@ -92,6 +113,7 @@ private struct SmallCountdownWidget: View {
 
     let snapshot: CountdownWidgetSnapshot?
     let now: Date
+    let backgroundImage: UIImage?
 
     var body: some View {
         if let snapshot {
@@ -117,7 +139,7 @@ private struct SmallCountdownWidget: View {
             }
             .padding(16)
             .containerBackground(for: .widget) {
-                WidgetCountdownBackground(theme: snapshot.theme, appearance: snapshot.appearance)
+                WidgetCountdownBackground(theme: snapshot.theme, appearance: snapshot.appearance, image: backgroundImage)
             }
         } else {
             EmptyHomeWidget()
@@ -131,6 +153,7 @@ private struct MediumCountdownWidget: View {
 
     let snapshot: CountdownWidgetSnapshot?
     let now: Date
+    let backgroundImage: UIImage?
 
     var body: some View {
         if let snapshot {
@@ -161,7 +184,7 @@ private struct MediumCountdownWidget: View {
             }
             .padding(18)
             .containerBackground(for: .widget) {
-                WidgetCountdownBackground(theme: snapshot.theme, appearance: snapshot.appearance)
+                WidgetCountdownBackground(theme: snapshot.theme, appearance: snapshot.appearance, image: backgroundImage)
             }
         } else {
             EmptyHomeWidget()
@@ -174,6 +197,7 @@ private struct LargeCountdownWidget: View {
     @Environment(\.showsWidgetContainerBackground) private var showsContainerBackground
 
     let viewModel: CountdownWidgetViewModel
+    let backgroundImage: UIImage?
 
     var body: some View {
         if let primarySnapshot = viewModel.primarySnapshot {
@@ -222,7 +246,7 @@ private struct LargeCountdownWidget: View {
             }
             .padding(18)
             .containerBackground(for: .widget) {
-                WidgetCountdownBackground(theme: primarySnapshot.theme, appearance: primarySnapshot.appearance)
+                WidgetCountdownBackground(theme: primarySnapshot.theme, appearance: primarySnapshot.appearance, image: backgroundImage)
             }
         } else {
             EmptyHomeWidget()
@@ -250,10 +274,25 @@ private struct WidgetCountdownBackground: View {
 
     let theme: CountdownTheme
     let appearance: CountdownAppearance
+    let image: UIImage?
 
     var body: some View {
         if renderingMode == .fullColor {
-            CountdownBackgroundView(theme: theme, appearance: appearance, previewImage: nil)
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .overlay {
+                        Color.black.opacity(min(max(appearance.dimAmount.isFinite ? appearance.dimAmount : 0.25, 0), 0.8))
+                    }
+                    .clipped()
+                    .accessibilityHidden(true)
+            } else {
+                theme.gradient
+                    .overlay {
+                        if appearance.hasImage { Color.black.opacity(0.35) }
+                    }
+            }
         } else {
             Color.clear
         }

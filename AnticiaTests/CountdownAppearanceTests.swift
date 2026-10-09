@@ -238,6 +238,109 @@ final class CountdownAppearanceTests: XCTestCase {
     }
 
     @MainActor
+    func testPhotoWidgetRenditionsUseFamilyPixelSizesWithoutChangingStoredSource() throws {
+        let sourceSize = CGSize(width: 1600, height: 1200)
+        let sourceData = try XCTUnwrap(testImage(size: sourceSize).jpegData(compressionQuality: 0.95))
+        let name = try CountdownImageStore.savePhoto(data: sourceData)
+        defer { CountdownImageStore.removePhoto(named: name) }
+        let sharedContainer = try XCTUnwrap(FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.lancy.Anticia"))
+        let sourceURL = sharedContainer.appendingPathComponent("CountdownBackgrounds").appendingPathComponent(name)
+        let cachedSource = try XCTUnwrap(CountdownImageStore.image(named: name, kind: .photo))
+        assertSize(pixelSize(of: cachedSource), equals: sourceSize)
+        XCTAssertEqual(try Data(contentsOf: sourceURL), sourceData)
+        let appearance = CountdownAppearance(backgroundKind: .photo, imageName: name)
+
+        let small = try XCTUnwrap(CountdownImageStore.renderedBackground(
+            appearance: appearance, size: CGSize(width: 170, height: 170), displayScale: 3
+        ))
+        let medium = try XCTUnwrap(CountdownImageStore.renderedBackground(
+            appearance: appearance, size: CGSize(width: 364, height: 170), displayScale: 3
+        ))
+        try assertRendition(small, pointSize: CGSize(width: 170, height: 170), pixelSize: CGSize(width: 510, height: 510))
+        try assertRendition(medium, pointSize: CGSize(width: 364, height: 170), pixelSize: CGSize(width: 1092, height: 510))
+
+        // A family rendition must not overwrite the shared photo or its full-size cache.
+        XCTAssertEqual(try Data(contentsOf: sourceURL), sourceData)
+        let diskSource = try XCTUnwrap(UIImage(contentsOfFile: sourceURL.path))
+        let sourceAfterRendering = try XCTUnwrap(CountdownImageStore.image(named: name, kind: .photo))
+        assertSize(pixelSize(of: diskSource), equals: sourceSize)
+        assertSize(pixelSize(of: sourceAfterRendering), equals: sourceSize)
+    }
+
+    @MainActor
+    func testPhotoWidgetRenditionHonorsSavedZoomAndPanOnBothAxes() throws {
+        let source = quadrantImage(size: CGSize(width: 1200, height: 1200))
+        let name = try CountdownImageStore.savePhoto(data: XCTUnwrap(source.jpegData(compressionQuality: 0.95)))
+        defer { CountdownImageStore.removePhoto(named: name) }
+        let container = try makeMemoryContainer()
+        let event = makeCountdown()
+        container.mainContext.insert(event)
+        let crops: [(x: Double, y: Double, red: Double, green: Double, blue: Double)] = [
+            (0, 0, 1, 0, 0),
+            (1, 0, 0, 1, 0),
+            (0, 1, 0, 0, 1),
+            (1, 1, 1, 1, 0)
+        ]
+
+        for crop in crops {
+            event.appearance = CountdownAppearance(
+                backgroundKind: .photo, imageName: name,
+                imageScale: 2, imagePositionX: crop.x, imagePositionY: crop.y
+            )
+            try container.mainContext.save()
+            let readContext = ModelContext(container)
+            let savedEvent = try XCTUnwrap(readContext.fetch(FetchDescriptor<CountdownEntity>()).first)
+            let rendition = try XCTUnwrap(CountdownImageStore.renderedBackground(
+                appearance: savedEvent.appearance, size: CGSize(width: 170, height: 170), displayScale: 3
+            ))
+
+            // With 2× zoom, each extreme pan centers a different solid quadrant.
+            // Ignoring either saved pan coordinate or zoom changes the sampled color.
+            try assertCenterPixel(rendition, red: crop.red, green: crop.green, blue: crop.blue)
+        }
+    }
+
+    @MainActor
+    func testSampleWidgetRenditionsMatchSmallAndMediumFamilyDimensions() throws {
+        for sample in CountdownBackgroundSample.allCases {
+            let appearance = CountdownAppearance(backgroundKind: .sample, imageName: sample.imageName)
+            let small = try XCTUnwrap(CountdownImageStore.renderedBackground(
+                appearance: appearance, size: CGSize(width: 170, height: 170), displayScale: 3
+            ), "Missing small rendition for \(sample.imageName)")
+            let medium = try XCTUnwrap(CountdownImageStore.renderedBackground(
+                appearance: appearance, size: CGSize(width: 364, height: 170), displayScale: 3
+            ), "Missing medium rendition for \(sample.imageName)")
+
+            try assertRendition(small, pointSize: CGSize(width: 170, height: 170), pixelSize: CGSize(width: 510, height: 510))
+            try assertRendition(medium, pointSize: CGSize(width: 364, height: 170), pixelSize: CGSize(width: 1092, height: 510))
+        }
+    }
+
+    @MainActor
+    func testWidgetRenditionsRejectMissingImagesAndInvalidCanvasArguments() {
+        let validSize = CGSize(width: 170, height: 170)
+        let missingImages = [
+            CountdownAppearance(),
+            CountdownAppearance(backgroundKind: .sample),
+            CountdownAppearance(backgroundKind: .sample, imageName: "UnknownSample"),
+            CountdownAppearance(backgroundKind: .photo, imageName: "\(UUID().uuidString).jpg"),
+            CountdownAppearance(backgroundKind: .photo, imageName: "../invalid.jpg")
+        ]
+        for appearance in missingImages {
+            XCTAssertNil(CountdownImageStore.renderedBackground(appearance: appearance, size: validSize, displayScale: 3))
+        }
+
+        let appearance = CountdownAppearance(backgroundKind: .sample, imageName: CountdownBackgroundSample.coast.imageName)
+        for size in [CGSize.zero, CGSize(width: -1, height: 170), CGSize(width: 170, height: 0),
+                     CGSize(width: CGFloat.nan, height: 170), CGSize(width: 170, height: CGFloat.infinity)] {
+            XCTAssertNil(CountdownImageStore.renderedBackground(appearance: appearance, size: size, displayScale: 3))
+        }
+        for displayScale in [CGFloat.zero, -1, .nan, .infinity] {
+            XCTAssertNil(CountdownImageStore.renderedBackground(appearance: appearance, size: validSize, displayScale: displayScale))
+        }
+    }
+
+    @MainActor
     func testBundledSamplesAndAllCardStylesRenderWithCustomTextColors() throws {
         let customColors = ["FFFFFF", "FFDE83", "C6FFEE"]
         var fixtures: [CardRenderingFixture] = []
@@ -317,6 +420,60 @@ final class CountdownAppearanceTests: XCTestCase {
     @MainActor
     private func pixelSize(of image: UIImage) -> CGSize {
         CGSize(width: image.size.width * image.scale, height: image.size.height * image.scale)
+    }
+
+    @MainActor
+    private func quadrantImage(size: CGSize) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        format.opaque = true
+        format.preferredRange = .standard
+        return UIGraphicsImageRenderer(size: size, format: format).image { context in
+            let halfWidth = size.width / 2
+            let halfHeight = size.height / 2
+            let quadrants: [(UIColor, CGRect)] = [
+                (UIColor(red: 1, green: 0, blue: 0, alpha: 1), CGRect(x: 0, y: 0, width: halfWidth, height: halfHeight)),
+                (UIColor(red: 0, green: 1, blue: 0, alpha: 1), CGRect(x: halfWidth, y: 0, width: halfWidth, height: halfHeight)),
+                (UIColor(red: 0, green: 0, blue: 1, alpha: 1), CGRect(x: 0, y: halfHeight, width: halfWidth, height: halfHeight)),
+                (UIColor(red: 1, green: 1, blue: 0, alpha: 1), CGRect(x: halfWidth, y: halfHeight, width: halfWidth, height: halfHeight))
+            ]
+            for (color, rect) in quadrants {
+                color.setFill()
+                context.fill(rect)
+            }
+        }
+    }
+
+    @MainActor
+    private func assertRendition(_ image: UIImage, pointSize: CGSize, pixelSize: CGSize, file: StaticString = #filePath, line: UInt = #line) throws {
+        let cgImage = try XCTUnwrap(image.cgImage, file: file, line: line)
+        assertSize(image.size, equals: pointSize, file: file, line: line)
+        XCTAssertEqual(image.scale, 3, file: file, line: line)
+        XCTAssertEqual(cgImage.width, Int(pixelSize.width), file: file, line: line)
+        XCTAssertEqual(cgImage.height, Int(pixelSize.height), file: file, line: line)
+    }
+
+    @MainActor
+    private func assertCenterPixel(_ image: UIImage, red: Double, green: Double, blue: Double, file: StaticString = #filePath, line: UInt = #line) throws {
+        let cgImage = try XCTUnwrap(image.cgImage, file: file, line: line)
+        let colorSpace = try XCTUnwrap(CGColorSpace(name: CGColorSpace.sRGB), file: file, line: line)
+        var pixel = [UInt8](repeating: 0, count: 4)
+        try pixel.withUnsafeMutableBytes { bytes in
+            let context = try XCTUnwrap(CGContext(
+                data: bytes.baseAddress, width: 1, height: 1, bitsPerComponent: 8, bytesPerRow: 4,
+                space: colorSpace,
+                bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue
+            ), file: file, line: line)
+            context.interpolationQuality = .none
+            context.draw(cgImage, in: CGRect(
+                x: -(cgImage.width / 2), y: -(cgImage.height / 2), width: cgImage.width, height: cgImage.height
+            ))
+        }
+        // JPEG is lossy, so compare saturated channels with an 8-bit tolerance.
+        XCTAssertEqual(Double(pixel[0]) / 255, red, accuracy: 0.03, file: file, line: line)
+        XCTAssertEqual(Double(pixel[1]) / 255, green, accuracy: 0.03, file: file, line: line)
+        XCTAssertEqual(Double(pixel[2]) / 255, blue, accuracy: 0.03, file: file, line: line)
+        XCTAssertEqual(pixel[3], 255, file: file, line: line)
     }
 
     @MainActor
