@@ -7,14 +7,16 @@ struct EventRow: View {
     var body: some View {
         HStack(spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(event.theme.gradient)
+                CountdownBackgroundView(theme: event.theme, appearance: event.appearance)
                     .frame(width: 52, height: 52)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .accessibilityHidden(true)
 
                 Image(systemName: event.wrappedIconName)
                     .font(.headline.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(event.appearance.foregroundColor(default: .white))
             }
+            .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(event.wrappedTitle)

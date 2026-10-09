@@ -5,6 +5,8 @@ struct CountdownRing: View {
     let primaryText: String
     let secondaryText: String
     let theme: CountdownTheme
+    var foregroundColor: Color? = nil
+    var secondaryColor: Color? = nil
 
     var body: some View {
         ZStack {
@@ -19,11 +21,13 @@ struct CountdownRing: View {
             VStack(spacing: 4) {
                 Text(primaryText)
                     .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .foregroundStyle(foregroundColor ?? .primary)
                 Text(secondaryText)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(secondaryColor ?? .secondary)
             }
         }
         .frame(width: 190, height: 190)
+        .accessibilityElement(children: .combine)
     }
 }

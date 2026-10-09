@@ -11,4 +11,5 @@ struct CountdownDraft {
     let isAllDay: Bool
     let repeatRule: CountdownRepeatRule
     let widgetStyle: CountdownWidgetStyle
+    var appearance: CountdownAppearance = CountdownAppearance()
 }

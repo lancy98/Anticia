@@ -42,6 +42,9 @@ Install Anticia from the App Store to track events, trips, birthdays, deadlines,
 
 - Categories for trips, birthdays, anniversaries, holidays, work, and personal events.
 - Multiple color themes and card styles.
+- Backgrounds for each countdown: gradients, bundled sample images, or personal photos.
+- Photo positioning and zoom, background dimming, and a live card preview.
+- Text color presets and a custom color picker.
 - Symbol picker with searchable SF Symbol options.
 - Light, dark, and system appearance settings.
 
@@ -59,6 +62,7 @@ Install Anticia from the App Store to track events, trips, birthdays, deadlines,
 - Small and medium widgets show the next upcoming countdown.
 - Large widgets show a compact list of upcoming countdowns.
 - Widgets use each countdown's selected color theme and deep link back into Anticia.
+- Full-color Home Screen widgets also use the next countdown's background and text color; Lock Screen and system-tinted appearances adapt to iOS styling.
 - Widget data is exported through the shared app group and refreshed after countdown changes.
 - Widget timelines refresh when countdown dates pass and at the next daily boundary.
 
@@ -109,6 +113,7 @@ Anticia follows a lightweight MVVM structure:
 - Widget snapshots are exported by `CountdownWidgetSnapshotStore` into the shared app group.
 - Widget timeline and display state are handled by `CountdownWidgetViewModel`.
 - Widget rendering lives in the `AnticiaWidgets` extension.
+- Countdown appearance and image rendering are shared with the widget extension. Imported photos are downsampled to JPEG files in the shared app group, while SwiftData and widget snapshots store only appearance metadata and filenames.
 
 The project has Main Actor default actor isolation enabled.
 
@@ -131,6 +136,10 @@ The project has Main Actor default actor isolation enabled.
 2. Select the `Anticia` scheme.
 3. Choose an iPhone simulator or a physical device.
 4. Build and run with `Cmd + R`.
+
+### Run The Tests
+
+Select the `Anticia` scheme and an iOS Simulator, then use `Cmd + U`. Tests cover existing-store migration, saved appearance, photo conversion and shared file storage, cropping calculations, and rendering the bundled backgrounds in each card style. Keep Simulator code signing enabled so the App Group entitlement is available for the photo-storage test.
 
 ## License
 

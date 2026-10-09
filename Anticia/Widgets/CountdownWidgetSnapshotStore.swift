@@ -43,6 +43,13 @@ private struct CountdownWidgetSnapshot: Codable {
     let themeRawValue: String
     let repeatRuleRawValue: String
     let createdAt: Date
+    let backgroundKindRawValue: String?
+    let backgroundImageName: String?
+    let textColorHex: String?
+    let backgroundDimAmount: Double?
+    let backgroundImageScale: Double?
+    let backgroundImagePositionX: Double?
+    let backgroundImagePositionY: Double?
 
     init(event: CountdownEntity, relativeTo now: Date) {
         id = event.wrappedID
@@ -53,5 +60,13 @@ private struct CountdownWidgetSnapshot: Codable {
         themeRawValue = event.theme.rawValue
         repeatRuleRawValue = event.repeatRule.rawValue
         createdAt = event.wrappedCreatedAt
+        let appearance = event.appearance
+        backgroundKindRawValue = appearance.backgroundKind.rawValue
+        backgroundImageName = appearance.imageName
+        textColorHex = appearance.textColorHex
+        backgroundDimAmount = appearance.dimAmount
+        backgroundImageScale = appearance.imageScale
+        backgroundImagePositionX = appearance.imagePositionX
+        backgroundImagePositionY = appearance.imagePositionY
     }
 }

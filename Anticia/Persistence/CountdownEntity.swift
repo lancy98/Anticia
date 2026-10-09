@@ -16,6 +16,13 @@ final class CountdownEntity {
     var themeRawValue: String
     var title: String
     var widgetStyleRawValue: String?
+    var backgroundKindRawValue: String?
+    var backgroundImageName: String?
+    var textColorHex: String?
+    var backgroundDimAmount: Double?
+    var backgroundImageScale: Double?
+    var backgroundImagePositionX: Double?
+    var backgroundImagePositionY: Double?
 
     init(
         id: UUID = UUID(),
@@ -73,6 +80,29 @@ final class CountdownEntity {
     var repeatRule: CountdownRepeatRule { CountdownRepeatRule(rawValue: repeatRuleRawValue ?? "") ?? .never }
     var theme: CountdownTheme { CountdownTheme(rawValue: themeRawValue) ?? .ocean }
     var widgetStyle: CountdownWidgetStyle { CountdownWidgetStyle(rawValue: widgetStyleRawValue ?? "") ?? .classic }
+
+    var appearance: CountdownAppearance {
+        get {
+            CountdownAppearance(
+                backgroundKind: CountdownBackgroundKind(rawValue: backgroundKindRawValue ?? "") ?? .gradient,
+                imageName: backgroundImageName,
+                textColorHex: textColorHex,
+                dimAmount: backgroundDimAmount ?? 0.25,
+                imageScale: backgroundImageScale ?? 1,
+                imagePositionX: backgroundImagePositionX ?? 0.5,
+                imagePositionY: backgroundImagePositionY ?? 0.5
+            )
+        }
+        set {
+            backgroundKindRawValue = newValue.backgroundKind.rawValue
+            backgroundImageName = newValue.hasImage ? newValue.imageName : nil
+            textColorHex = newValue.textColorHex
+            backgroundDimAmount = newValue.dimAmount
+            backgroundImageScale = newValue.imageScale
+            backgroundImagePositionX = newValue.imagePositionX
+            backgroundImagePositionY = newValue.imagePositionY
+        }
+    }
 
     var isFinished: Bool {
         isFinished(relativeTo: .now)

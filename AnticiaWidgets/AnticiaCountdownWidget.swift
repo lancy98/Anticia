@@ -87,15 +87,23 @@ private struct CountdownWidgetEntryView: View {
 }
 
 private struct SmallCountdownWidget: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.showsWidgetContainerBackground) private var showsContainerBackground
+
     let snapshot: CountdownWidgetSnapshot?
     let now: Date
 
     var body: some View {
         if let snapshot {
             let viewModel = CountdownSnapshotViewModel(snapshot: snapshot, now: now)
+            let colors = WidgetAppearanceColors(
+                appearance: snapshot.appearance,
+                renderingMode: renderingMode,
+                showsContainerBackground: showsContainerBackground
+            )
 
             VStack(alignment: .leading, spacing: 8) {
-                WidgetTitle(snapshot: snapshot, dateLine: viewModel.shortDateLine)
+                WidgetTitle(snapshot: snapshot, dateLine: viewModel.shortDateLine, colors: colors)
 
                 Spacer(minLength: 6)
 
@@ -105,10 +113,12 @@ private struct SmallCountdownWidget: View {
                     Text("days to go")
                         .font(.caption.weight(.bold))
                 }
-                .foregroundStyle(.black.opacity(0.84))
+                .foregroundStyle(colors.primary)
             }
             .padding(16)
-            .containerBackground(snapshot.theme.gradient, for: .widget)
+            .containerBackground(for: .widget) {
+                WidgetCountdownBackground(theme: snapshot.theme, appearance: snapshot.appearance)
+            }
         } else {
             EmptyHomeWidget()
         }
@@ -116,21 +126,29 @@ private struct SmallCountdownWidget: View {
 }
 
 private struct MediumCountdownWidget: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.showsWidgetContainerBackground) private var showsContainerBackground
+
     let snapshot: CountdownWidgetSnapshot?
     let now: Date
 
     var body: some View {
         if let snapshot {
             let viewModel = CountdownSnapshotViewModel(snapshot: snapshot, now: now)
+            let colors = WidgetAppearanceColors(
+                appearance: snapshot.appearance,
+                renderingMode: renderingMode,
+                showsContainerBackground: showsContainerBackground
+            )
 
             HStack(spacing: 18) {
                 VStack(alignment: .leading, spacing: 10) {
-                    WidgetTitle(snapshot: snapshot, dateLine: viewModel.longDateLine)
+                    WidgetTitle(snapshot: snapshot, dateLine: viewModel.longDateLine, colors: colors)
 
                     Spacer(minLength: 6)
 
                     ProgressView(value: viewModel.progress)
-                        .tint(.black.opacity(0.66))
+                        .tint(colors.primary.opacity(0.8))
                 }
 
                 VStack(alignment: .trailing, spacing: 1) {
@@ -139,10 +157,12 @@ private struct MediumCountdownWidget: View {
                     Text("days")
                         .font(.caption.weight(.bold))
                 }
-                .foregroundStyle(.black.opacity(0.84))
+                .foregroundStyle(colors.primary)
             }
             .padding(18)
-            .containerBackground(snapshot.theme.gradient, for: .widget)
+            .containerBackground(for: .widget) {
+                WidgetCountdownBackground(theme: snapshot.theme, appearance: snapshot.appearance)
+            }
         } else {
             EmptyHomeWidget()
         }
@@ -150,16 +170,23 @@ private struct MediumCountdownWidget: View {
 }
 
 private struct LargeCountdownWidget: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.showsWidgetContainerBackground) private var showsContainerBackground
+
     let viewModel: CountdownWidgetViewModel
 
     var body: some View {
-        if viewModel.snapshots.isEmpty {
-            EmptyHomeWidget()
-        } else {
+        if let primarySnapshot = viewModel.primarySnapshot {
+            let colors = WidgetAppearanceColors(
+                appearance: primarySnapshot.appearance,
+                renderingMode: renderingMode,
+                showsContainerBackground: showsContainerBackground
+            )
+
             VStack(alignment: .leading, spacing: 14) {
                 Text("Upcoming")
                     .font(.headline.weight(.bold))
-                    .foregroundStyle(.black.opacity(0.82))
+                    .foregroundStyle(colors.primary)
 
                 VStack(spacing: 10) {
                     ForEach(viewModel.largeWidgetSnapshots) { snapshot in
@@ -170,7 +197,7 @@ private struct LargeCountdownWidget: View {
                                 Image(systemName: snapshot.iconName)
                                     .font(.headline.weight(.bold))
                                     .frame(width: 32, height: 32)
-                                    .background(.black.opacity(0.08), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .background(colors.primary.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(snapshot.title)
@@ -178,23 +205,57 @@ private struct LargeCountdownWidget: View {
                                         .lineLimit(1)
                                     Text(snapshotViewModel.shortDateLine)
                                         .font(.caption2.weight(.semibold))
-                                        .foregroundStyle(.black.opacity(0.56))
+                                        .foregroundStyle(colors.secondary)
                                 }
 
                                 Spacer(minLength: 8)
 
                                 Text(snapshotViewModel.statusLine)
                                     .font(.caption.weight(.bold))
-                                    .foregroundStyle(.black.opacity(0.7))
+                                    .foregroundStyle(colors.primary.opacity(0.85))
                                     .lineLimit(1)
                             }
-                            .foregroundStyle(.black.opacity(0.84))
+                            .foregroundStyle(colors.primary)
                         }
                     }
                 }
             }
             .padding(18)
-            .containerBackground(viewModel.largeWidgetTheme.gradient, for: .widget)
+            .containerBackground(for: .widget) {
+                WidgetCountdownBackground(theme: primarySnapshot.theme, appearance: primarySnapshot.appearance)
+            }
+        } else {
+            EmptyHomeWidget()
+        }
+    }
+}
+
+private struct WidgetAppearanceColors {
+    let primary: Color
+    let secondary: Color
+
+    init(appearance: CountdownAppearance, renderingMode: WidgetRenderingMode, showsContainerBackground: Bool) {
+        if renderingMode == .fullColor && showsContainerBackground {
+            primary = appearance.foregroundColor(default: .black.opacity(0.84))
+            secondary = appearance.secondaryColor(default: .black.opacity(0.58))
+        } else {
+            primary = .primary
+            secondary = .secondary
+        }
+    }
+}
+
+private struct WidgetCountdownBackground: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    let theme: CountdownTheme
+    let appearance: CountdownAppearance
+
+    var body: some View {
+        if renderingMode == .fullColor {
+            CountdownBackgroundView(theme: theme, appearance: appearance, previewImage: nil)
+        } else {
+            Color.clear
         }
     }
 }
@@ -268,6 +329,7 @@ private struct InlineLockWidget: View {
 private struct WidgetTitle: View {
     let snapshot: CountdownWidgetSnapshot
     let dateLine: String
+    let colors: WidgetAppearanceColors
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -281,10 +343,10 @@ private struct WidgetTitle: View {
 
             Text(dateLine)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.black.opacity(0.58))
+                .foregroundStyle(colors.secondary)
                 .lineLimit(1)
         }
-        .foregroundStyle(.black.opacity(0.84))
+        .foregroundStyle(colors.primary)
     }
 }
 
@@ -320,6 +382,47 @@ struct CountdownWidgetSnapshot: Codable, Identifiable {
     let themeRawValue: String
     let repeatRuleRawValue: String
     let createdAt: Date
+    let backgroundKindRawValue: String?
+    let backgroundImageName: String?
+    let textColorHex: String?
+    let backgroundDimAmount: Double?
+    let backgroundImageScale: Double?
+    let backgroundImagePositionX: Double?
+    let backgroundImagePositionY: Double?
+
+    init(
+        id: UUID,
+        title: String,
+        iconName: String,
+        targetDate: Date,
+        isAllDay: Bool,
+        themeRawValue: String,
+        repeatRuleRawValue: String,
+        createdAt: Date,
+        backgroundKindRawValue: String? = nil,
+        backgroundImageName: String? = nil,
+        textColorHex: String? = nil,
+        backgroundDimAmount: Double? = nil,
+        backgroundImageScale: Double? = nil,
+        backgroundImagePositionX: Double? = nil,
+        backgroundImagePositionY: Double? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.iconName = iconName
+        self.targetDate = targetDate
+        self.isAllDay = isAllDay
+        self.themeRawValue = themeRawValue
+        self.repeatRuleRawValue = repeatRuleRawValue
+        self.createdAt = createdAt
+        self.backgroundKindRawValue = backgroundKindRawValue
+        self.backgroundImageName = backgroundImageName
+        self.textColorHex = textColorHex
+        self.backgroundDimAmount = backgroundDimAmount
+        self.backgroundImageScale = backgroundImageScale
+        self.backgroundImagePositionX = backgroundImagePositionX
+        self.backgroundImagePositionY = backgroundImagePositionY
+    }
 
     static let preview = CountdownWidgetSnapshot(
         id: UUID(),
@@ -334,6 +437,18 @@ struct CountdownWidgetSnapshot: Codable, Identifiable {
 
     var theme: CountdownTheme {
         CountdownTheme(rawValue: themeRawValue) ?? .ocean
+    }
+
+    var appearance: CountdownAppearance {
+        CountdownAppearance(
+            backgroundKind: CountdownBackgroundKind(rawValue: backgroundKindRawValue ?? "") ?? .gradient,
+            imageName: backgroundImageName,
+            textColorHex: textColorHex,
+            dimAmount: backgroundDimAmount ?? 0.25,
+            imageScale: backgroundImageScale ?? 1,
+            imagePositionX: backgroundImagePositionX ?? 0.5,
+            imagePositionY: backgroundImagePositionY ?? 0.5
+        )
     }
 
     var repeatRule: CountdownRepeatRule {
@@ -506,19 +621,5 @@ enum CountdownTheme: String {
         case .peach:
             return [Color(hex: "FFD3A5"), Color(hex: "FFAA85")]
         }
-    }
-}
-
-private extension Color {
-    init(hex: String) {
-        let scanner = Scanner(string: hex)
-        var value: UInt64 = 0
-        scanner.scanHexInt64(&value)
-
-        let red = Double((value >> 16) & 0xFF) / 255
-        let green = Double((value >> 8) & 0xFF) / 255
-        let blue = Double(value & 0xFF) / 255
-
-        self.init(red: red, green: green, blue: blue)
     }
 }

@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		C81000022F66000100A76D68 /* AnticiaWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C81000012F66000100A76D68 /* AnticiaWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C82001012F66000100A76D68 /* CountdownAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82000012F66000100A76D68 /* CountdownAppearance.swift */; };
+		C82001022F66000100A76D68 /* CountdownBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82000022F66000100A76D68 /* CountdownBackgroundView.swift */; };
+		C82001032F66000100A76D68 /* CountdownImageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82000032F66000100A76D68 /* CountdownImageStore.swift */; };
+		C82001042F66000100A76D68 /* CountdownImageLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82000042F66000100A76D68 /* CountdownImageLayout.swift */; };
+		C82001052F66000100A76D68 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C82000052F66000100A76D68 /* Color+Hex.swift */; };
+		C82001062F66000100A76D68 /* Backgrounds.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C82000062F66000100A76D68 /* Backgrounds.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -17,6 +23,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = C810000A2F66000100A76D68;
 			remoteInfo = AnticiaWidgets;
+		};
+		C83000022F66000100A76D68 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFFCEF0B2F64E81600A76D68 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BFFCEF122F64E81600A76D68;
+			remoteInfo = Anticia;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -37,6 +50,13 @@
 /* Begin PBXFileReference section */
 		BFFCEF132F64E81600A76D68 /* Anticia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Anticia.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C81000012F66000100A76D68 /* AnticiaWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AnticiaWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C82000012F66000100A76D68 /* CountdownAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/CountdownAppearance.swift"; sourceTree = "<group>"; };
+		C82000022F66000100A76D68 /* CountdownBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Components/CountdownBackgroundView.swift"; sourceTree = "<group>"; };
+		C82000032F66000100A76D68 /* CountdownImageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Persistence/CountdownImageStore.swift"; sourceTree = "<group>"; };
+		C82000042F66000100A76D68 /* CountdownImageLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Utilities/CountdownImageLayout.swift"; sourceTree = "<group>"; };
+		C82000052F66000100A76D68 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Utilities/Color+Hex.swift"; sourceTree = "<group>"; };
+		C82000062F66000100A76D68 /* Backgrounds.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Resources/Backgrounds.xcassets"; sourceTree = "<group>"; };
+		C83000012F66000100A76D68 /* AnticiaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AnticiaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -48,6 +68,11 @@
 		C81000052F66000100A76D68 /* AnticiaWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AnticiaWidgets;
+			sourceTree = "<group>";
+		};
+		C83000032F66000100A76D68 /* AnticiaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AnticiaTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -67,6 +92,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C83000042F66000100A76D68 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -74,7 +106,9 @@
 			isa = PBXGroup;
 			children = (
 				BFFCEF152F64E81600A76D68 /* Anticia */,
+				C82002012F66000100A76D68 /* Shared Appearance */,
 				C81000052F66000100A76D68 /* AnticiaWidgets */,
+				C83000032F66000100A76D68 /* AnticiaTests */,
 				BFFCEF142F64E81600A76D68 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -84,8 +118,23 @@
 			children = (
 				BFFCEF132F64E81600A76D68 /* Anticia.app */,
 				C81000012F66000100A76D68 /* AnticiaWidgets.appex */,
+				C83000012F66000100A76D68 /* AnticiaTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C82002012F66000100A76D68 /* Shared Appearance */ = {
+			isa = PBXGroup;
+			children = (
+				C82000012F66000100A76D68 /* CountdownAppearance.swift */,
+				C82000022F66000100A76D68 /* CountdownBackgroundView.swift */,
+				C82000032F66000100A76D68 /* CountdownImageStore.swift */,
+				C82000042F66000100A76D68 /* CountdownImageLayout.swift */,
+				C82000052F66000100A76D68 /* Color+Hex.swift */,
+				C82000062F66000100A76D68 /* Backgrounds.xcassets */,
+			);
+			name = "Shared Appearance";
+			path = Anticia;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -137,6 +186,29 @@
 			productReference = C81000012F66000100A76D68 /* AnticiaWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		C83000082F66000100A76D68 /* AnticiaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C83000092F66000100A76D68 /* Build configuration list for PBXNativeTarget "AnticiaTests" */;
+			buildPhases = (
+				C83000052F66000100A76D68 /* Sources */,
+				C83000042F66000100A76D68 /* Frameworks */,
+				C83000062F66000100A76D68 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C83000072F66000100A76D68 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C83000032F66000100A76D68 /* AnticiaTests */,
+			);
+			name = AnticiaTests;
+			packageProductDependencies = (
+			);
+			productName = AnticiaTests;
+			productReference = C83000012F66000100A76D68 /* AnticiaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -152,6 +224,10 @@
 					};
 					C810000A2F66000100A76D68 = {
 						CreatedOnToolsVersion = 26.3;
+					};
+					C83000082F66000100A76D68 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = BFFCEF122F64E81600A76D68;
 					};
 				};
 			};
@@ -171,6 +247,7 @@
 			targets = (
 				BFFCEF122F64E81600A76D68 /* Anticia */,
 				C810000A2F66000100A76D68 /* AnticiaWidgets */,
+				C83000082F66000100A76D68 /* AnticiaTests */,
 			);
 		};
 /* End PBXProject section */
@@ -184,6 +261,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C81000092F66000100A76D68 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C82001062F66000100A76D68 /* Backgrounds.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C83000062F66000100A76D68 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -204,6 +289,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C82001012F66000100A76D68 /* CountdownAppearance.swift in Sources */,
+				C82001022F66000100A76D68 /* CountdownBackgroundView.swift in Sources */,
+				C82001032F66000100A76D68 /* CountdownImageStore.swift in Sources */,
+				C82001042F66000100A76D68 /* CountdownImageLayout.swift in Sources */,
+				C82001052F66000100A76D68 /* Color+Hex.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C83000052F66000100A76D68 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,9 +312,58 @@
 			target = C810000A2F66000100A76D68 /* AnticiaWidgets */;
 			targetProxy = C81000032F66000100A76D68 /* PBXContainerItemProxy */;
 		};
+		C83000072F66000100A76D68 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BFFCEF122F64E81600A76D68 /* Anticia */;
+			targetProxy = C83000022F66000100A76D68 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		C830000A2F66000100A76D68 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KUU7CVJ7BU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks", );
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_IDENTIFIER).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Anticia.app/Anticia";
+			};
+			name = Debug;
+		};
+		C830000B2F66000100A76D68 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = KUU7CVJ7BU;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks", );
+				PRODUCT_BUNDLE_IDENTIFIER = "$(APP_BUNDLE_IDENTIFIER).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Anticia.app/Anticia";
+			};
+			name = Release;
+		};
 		BFFCEF1C2F64E81700A76D68 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -468,6 +614,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		C83000092F66000100A76D68 /* Build configuration list for PBXNativeTarget "AnticiaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C830000A2F66000100A76D68 /* Debug */,
+				C830000B2F66000100A76D68 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BFFCEF0E2F64E81600A76D68 /* Build configuration list for PBXProject "Anticia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

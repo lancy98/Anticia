@@ -17,13 +17,14 @@ enum PersistenceController {
         event: CountdownEntity?,
         draft: CountdownDraft,
         in context: ModelContext
-    ) -> CountdownEntity {
+    ) throws -> CountdownEntity {
         let trimmedTitle = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedLocation = draft.location.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedNotes = draft.notes.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedIconName = draft.iconName.trimmingCharacters(in: .whitespacesAndNewlines)
         let resolvedIcon = trimmedIconName.isEmpty ? draft.category.systemImage : trimmedIconName
         let savedEvent: CountdownEntity
+        let previousPhotoName = event?.appearance.backgroundKind == .photo ? event?.backgroundImageName : nil
 
         if let event {
             event.title = trimmedTitle
@@ -58,8 +59,17 @@ enum PersistenceController {
             savedEvent = newEvent
         }
 
-        try? context.save()
+        savedEvent.appearance = draft.appearance
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw error
+        }
         CountdownWidgetSnapshotStore.exportSnapshots(from: context)
+        if let previousPhotoName, previousPhotoName != savedEvent.backgroundImageName {
+            removePhotoIfUnused(named: previousPhotoName, in: context)
+        }
         return savedEvent
     }
 
@@ -95,9 +105,26 @@ enum PersistenceController {
     }
 
     static func delete(_ event: CountdownEntity, in context: ModelContext) {
-        CountdownNotificationScheduler.cancelStartNotification(for: event.wrappedID)
+        let photoName = event.appearance.backgroundKind == .photo ? event.backgroundImageName : nil
+        let eventID = event.wrappedID
         context.delete(event)
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            return
+        }
+        CountdownNotificationScheduler.cancelStartNotification(for: eventID)
         CountdownWidgetSnapshotStore.exportSnapshots(from: context)
+        if let photoName {
+            removePhotoIfUnused(named: photoName, in: context)
+        }
+    }
+
+    private static func removePhotoIfUnused(named name: String, in context: ModelContext) {
+        guard let events = try? context.fetch(FetchDescriptor<CountdownEntity>()),
+              !events.contains(where: { $0.backgroundImageName == name })
+        else { return }
+        CountdownImageStore.removePhoto(named: name)
     }
 }

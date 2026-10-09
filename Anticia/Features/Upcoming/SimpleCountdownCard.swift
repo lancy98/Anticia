@@ -1,9 +1,12 @@
 import SwiftUI
+import UIKit
 
 struct SimpleCountdownCard: View {
     let event: CountdownEntity
     let style: CountdownWidgetStyle
     let now: Date
+    var appearanceOverride: CountdownAppearance? = nil
+    var previewImage: UIImage? = nil
 
     @ViewBuilder
     var body: some View {
@@ -37,19 +40,22 @@ struct SimpleCountdownCard: View {
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 126, alignment: .leading)
         .background {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(event.theme.gradient)
+            CountdownBackgroundView(theme: event.theme, appearance: appearance, previewImage: previewImage)
                 .overlay(alignment: .topTrailing) {
-                    Circle()
-                        .fill(Color.white.opacity(0.18))
-                        .frame(width: 110, height: 110)
-                        .offset(x: 34, y: -34)
+                    if appearance.backgroundKind == .gradient {
+                        Circle()
+                            .fill(Color.white.opacity(0.18))
+                            .frame(width: 110, height: 110)
+                            .offset(x: 34, y: -34)
+                    }
                 }
                 .overlay(alignment: .bottomTrailing) {
-                    Circle()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 18)
-                        .frame(width: 96, height: 96)
-                        .offset(x: 28, y: 32)
+                    if appearance.backgroundKind == .gradient {
+                        Circle()
+                            .stroke(Color.white.opacity(0.2), lineWidth: 18)
+                            .frame(width: 96, height: 96)
+                            .offset(x: 28, y: 32)
+                    }
                 }
                 .overlay {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -100,19 +106,22 @@ struct SimpleCountdownCard: View {
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
         .background {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(event.theme.gradient)
+            CountdownBackgroundView(theme: event.theme, appearance: appearance, previewImage: previewImage)
                 .overlay(alignment: .topTrailing) {
-                    Circle()
-                        .fill(Color.white.opacity(0.18))
-                        .frame(width: 96, height: 96)
-                        .offset(x: 28, y: -42)
+                    if appearance.backgroundKind == .gradient {
+                        Circle()
+                            .fill(Color.white.opacity(0.18))
+                            .frame(width: 96, height: 96)
+                            .offset(x: 28, y: -42)
+                    }
                 }
                 .overlay(alignment: .bottomTrailing) {
-                    Circle()
-                        .stroke(Color.white.opacity(0.18), lineWidth: 16)
-                        .frame(width: 78, height: 78)
-                        .offset(x: 24, y: 32)
+                    if appearance.backgroundKind == .gradient {
+                        Circle()
+                            .stroke(Color.white.opacity(0.18), lineWidth: 16)
+                            .frame(width: 78, height: 78)
+                            .offset(x: 24, y: 32)
+                    }
                 }
                 .overlay {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -126,21 +135,25 @@ struct SimpleCountdownCard: View {
 
     private var gridCard: some View {
         ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(event.theme.gradient)
+            CountdownBackgroundView(theme: event.theme, appearance: appearance, previewImage: previewImage)
                 .overlay(alignment: .topTrailing) {
-                    Image(systemName: event.wrappedIconName)
-                        .font(.system(size: 64, weight: .bold))
-                        .foregroundStyle(primaryTextColor.opacity(0.18))
-                        .rotationEffect(.degrees(-8))
-                        .offset(x: 12, y: -6)
+                    if appearance.backgroundKind == .gradient {
+                        Image(systemName: event.wrappedIconName)
+                            .font(.system(size: 64, weight: .bold))
+                            .foregroundStyle(primaryTextColor.opacity(0.18))
+                            .rotationEffect(.degrees(-8))
+                            .offset(x: 12, y: -6)
+                    }
                 }
                 .overlay(alignment: .bottomTrailing) {
-                    Circle()
-                        .fill(Color.white.opacity(0.16))
-                        .frame(width: 82, height: 82)
-                        .offset(x: 24, y: 24)
+                    if appearance.backgroundKind == .gradient {
+                        Circle()
+                            .fill(Color.white.opacity(0.16))
+                            .frame(width: 82, height: 82)
+                            .offset(x: 24, y: 24)
+                    }
                 }
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("\(max(0, event.daysRemaining(relativeTo: now)))")
@@ -191,11 +204,15 @@ struct SimpleCountdownCard: View {
     }
 
     private var primaryTextColor: Color {
-        Color.black.opacity(0.86)
+        appearance.foregroundColor(default: Color.black.opacity(0.86))
     }
 
     private var secondaryTextColor: Color {
-        Color.black.opacity(0.58)
+        appearance.secondaryColor(default: Color.black.opacity(0.58))
+    }
+
+    private var appearance: CountdownAppearance {
+        appearanceOverride ?? event.appearance
     }
 
     private var dateLine: String {

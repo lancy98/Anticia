@@ -49,52 +49,67 @@ struct EventDetailView: View {
     }
 
     private var hero: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(event.theme.gradient)
-                .frame(height: 410)
-                .overlay(alignment: .topTrailing) {
-                    Circle()
-                        .fill(Color.white.opacity(0.18))
-                        .frame(width: 140, height: 140)
-                        .padding(32)
-                }
-
-            VStack(spacing: 20) {
-                VStack(spacing: 6) {
-                    Text(event.wrappedTitle)
-                        .font(.title.weight(.bold))
-                    Text(event.wrappedTargetDate.formatted(.dateTime.month(.wide).day().year()))
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.white.opacity(0.86))
-                }
-                .foregroundStyle(.white)
-
-                    CountdownRing(
-                        progress: event.countdownProgress,
-                        primaryText: "\(max(0, abs(event.daysRemaining)))",
-                        secondaryText: event.daysRemaining >= 0
-                            ? String(localized: L10n.daysToGoShort)
-                            : String(localized: L10n.daysAgoShort),
-                        theme: event.theme
-                    )
-
-                HStack(spacing: 26) {
-                    DetailMetric(
-                        title: String(localized: L10n.dateMetric),
-                        value: event.wrappedTargetDate.shortMonthDay
-                    )
-                    DetailMetric(title: String(localized: L10n.categoryMetric), value: event.category.title)
-                    DetailMetric(
-                        title: String(localized: L10n.statusMetric),
-                        value: event.isFinished
-                            ? String(localized: L10n.statusPast)
-                            : String(localized: L10n.statusUpcoming)
-                    )
-                }
+        VStack(spacing: 20) {
+            VStack(spacing: 6) {
+                Text(event.wrappedTitle)
+                    .font(.title.weight(.bold))
+                    .foregroundStyle(primaryTextColor)
+                    .multilineTextAlignment(.center)
+                Text(event.wrappedTargetDate.formatted(.dateTime.month(.wide).day().year()))
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(secondaryTextColor)
+                    .multilineTextAlignment(.center)
             }
-            .padding(24)
+
+            CountdownRing(
+                progress: event.countdownProgress,
+                primaryText: "\(max(0, abs(event.daysRemaining)))",
+                secondaryText: event.daysRemaining >= 0
+                    ? String(localized: L10n.daysToGoShort)
+                    : String(localized: L10n.daysAgoShort),
+                theme: event.theme,
+                foregroundColor: primaryTextColor,
+                secondaryColor: secondaryTextColor
+            )
+
+            HStack(spacing: 26) {
+                DetailMetric(
+                    title: String(localized: L10n.dateMetric),
+                    value: event.wrappedTargetDate.shortMonthDay,
+                    foregroundColor: primaryTextColor,
+                    secondaryColor: metricSecondaryColor
+                )
+                DetailMetric(
+                    title: String(localized: L10n.categoryMetric),
+                    value: event.category.title,
+                    foregroundColor: primaryTextColor,
+                    secondaryColor: metricSecondaryColor
+                )
+                DetailMetric(
+                    title: String(localized: L10n.statusMetric),
+                    value: event.isFinished
+                        ? String(localized: L10n.statusPast)
+                        : String(localized: L10n.statusUpcoming),
+                    foregroundColor: primaryTextColor,
+                    secondaryColor: metricSecondaryColor
+                )
+            }
         }
+        .padding(24)
+        .frame(maxWidth: .infinity, minHeight: 410)
+        .background {
+            CountdownBackgroundView(theme: event.theme, appearance: event.appearance)
+                .overlay(alignment: .topTrailing) {
+                    if event.appearance.backgroundKind == .gradient {
+                        Circle()
+                            .fill(Color.white.opacity(0.18))
+                            .frame(width: 140, height: 140)
+                            .padding(32)
+                    }
+                }
+                .accessibilityHidden(true)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
     }
 
     private var details: some View {
@@ -114,27 +129,57 @@ struct EventDetailView: View {
                     )
                     DetailRow(title: String(localized: L10n.location), value: event.wrappedLocation)
                     DetailRow(title: String(localized: L10n.repeatRule), value: event.repeatRule.title)
-                    DetailRow(title: String(localized: L10n.theme), value: event.theme.title)
+                    DetailRow(title: backgroundLabel, value: backgroundTitle)
                     DetailRow(title: String(localized: L10n.countdownMetric), value: event.statusCopy)
                 }
             }
         }
     }
 
+    private var primaryTextColor: Color {
+        event.appearance.foregroundColor(default: .white)
+    }
+
+    private var secondaryTextColor: Color {
+        event.appearance.secondaryColor(default: .white.opacity(0.86))
+    }
+
+    private var metricSecondaryColor: Color {
+        event.appearance.secondaryColor(default: .white.opacity(0.72))
+    }
+
+    private var backgroundLabel: String {
+        event.appearance.backgroundKind == .gradient
+            ? String(localized: L10n.theme)
+            : String(localized: "appearance.background")
+    }
+
+    private var backgroundTitle: String {
+        switch event.appearance.backgroundKind {
+        case .gradient:
+            return event.theme.title
+        case .sample:
+            return String(localized: "appearance.sampleImages")
+        case .photo:
+            return String(localized: "appearance.myPhoto")
+        }
+    }
 }
 
 private struct DetailMetric: View {
     let title: String
     let value: String
+    var foregroundColor: Color = .white
+    var secondaryColor: Color = .white.opacity(0.72)
 
     var body: some View {
         VStack(spacing: 4) {
             Text(title)
                 .font(.caption.weight(.medium))
-                .foregroundStyle(.white.opacity(0.72))
+                .foregroundStyle(secondaryColor)
             Text(value)
                 .font(.caption.weight(.bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(foregroundColor)
                 .multilineTextAlignment(.center)
         }
     }
