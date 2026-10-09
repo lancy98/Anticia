@@ -53,6 +53,7 @@ Recommended App Store upload order is shown below and matches the numbered filen
 - Text color presets and a custom color picker.
 - Symbol picker with searchable SF Symbol options.
 - Light, dark, and system appearance settings.
+- App icons for [Light, Dark, and Tinted](Design/AppIcon/prompt.md) Home Screen appearances on iOS 18 and later.
 
 ### Notifications
 
