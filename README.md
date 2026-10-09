@@ -14,21 +14,33 @@ Install Anticia from the App Store to track events, trips, birthdays, deadlines,
 
 ## Screenshots
 
-Recommended App Store upload order is shown below and matches the numbered filenames. All seven screenshots in [Screenshots](Screenshots/) are opaque sRGB PNGs at **1206 × 2622 pixels**, sized for the **iPhone with Dynamic Island (medium display)** slot in App Store Connect.
+### iPhone
 
-Select that display slot, click **Upload**, choose the seven PNGs directly inside `Screenshots/`, and arrange them from `01` to `07`. See [Apple’s screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications).
-
-| 01. Upcoming | 02. Photo backgrounds | 03. Text colors |
-| ------------ | --------------------- | --------------- |
+| 01. Upcoming                                                                                             | 02. Photo backgrounds                                                                                 | 03. Text colors                                                                                                      |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | <img src="Screenshots/01-upcoming.png" alt="Anticia Upcoming screen with image backgrounds" width="260"> | <img src="Screenshots/02-photo-backgrounds.png" alt="Anticia personal photo backgrounds" width="260"> | <img src="Screenshots/03-text-colors.png" alt="Anticia background samples and text color customization" width="260"> |
 
-| 04. Home Screen widgets | 05. Calendar | 06. Timeline |
-| ----------------------- | ------------ | ------------ |
+| 04. Home Screen widgets                                                                                                | 05. Calendar                                                                      | 06. Timeline                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | <img src="Screenshots/04-widget-home-screen.png" alt="Anticia Home Screen widgets with image backgrounds" width="260"> | <img src="Screenshots/05-calendar.png" alt="Anticia Calendar screen" width="260"> | <img src="Screenshots/06-timeline.png" alt="Anticia Timeline screen" width="260"> |
 
-| 07. Lock Screen widgets |
-| ----------------------- |
+| 07. Lock Screen widgets                                                                         |
+| ----------------------------------------------------------------------------------------------- |
 | <img src="Screenshots/07-widget-lock-screen.png" alt="Anticia Lock Screen widgets" width="260"> |
+
+### iPad
+
+| 01. Upcoming                                                                                                                  | 02. Photo backgrounds                                                                                                     | 03. Text colors                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| <img src="Screenshots/iPad-13-inch/01-upcoming.png" alt="Anticia Upcoming screen on iPad with image backgrounds" width="260"> | <img src="Screenshots/iPad-13-inch/02-photo-backgrounds.png" alt="Anticia photo background controls on iPad" width="260"> | <img src="Screenshots/iPad-13-inch/03-text-colors.png" alt="Anticia background samples and text colors on iPad" width="260"> |
+
+| 04. Home Screen widgets                                                                                                                | 05. Calendar                                                                                           | 06. Timeline                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| <img src="Screenshots/iPad-13-inch/04-widget-home-screen.png" alt="Anticia image backgrounds on iPad Home Screen widgets" width="260"> | <img src="Screenshots/iPad-13-inch/05-calendar.png" alt="Anticia Calendar screen on iPad" width="260"> | <img src="Screenshots/iPad-13-inch/06-timeline.png" alt="Anticia Timeline screen on iPad" width="260"> |
+
+| 07. Lock Screen widgets                                                                                              | 08. Completed                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| <img src="Screenshots/iPad-13-inch/07-widget-lock-screen.png" alt="Anticia Lock Screen widgets on iPad" width="260"> | <img src="Screenshots/iPad-13-inch/08-completed.png" alt="Anticia Completed countdowns on iPad" width="260"> |
 
 ## Features
 
