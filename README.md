@@ -14,13 +14,19 @@ Install Anticia from the App Store to track events, trips, birthdays, deadlines,
 
 ## Screenshots
 
-|                                                                                |                                                                                |                                                                                |
-| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| <img src="Screenshots/upcoming.png" alt="Anticia Upcoming screen" width="260"> | <img src="Screenshots/calendar.png" alt="Anticia Calendar screen" width="260"> | <img src="Screenshots/timeline.png" alt="Anticia Timeline screen" width="260"> |
+Recommended App Store upload order is shown below and matches the numbered filenames. All seven screenshots are opaque PNGs at 1284 × 2778 pixels.
 
-|                                                                                              |                                                                                              |
-| -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| <img src="Screenshots/widget-home-screen.png" alt="Anticia Home Screen widgets" width="260"> | <img src="Screenshots/widget-lock-screen.png" alt="Anticia Lock Screen widgets" width="260"> |
+| 01. Upcoming | 02. Photo backgrounds | 03. Text colors |
+| ------------ | --------------------- | --------------- |
+| <img src="Screenshots/01-upcoming.png" alt="Anticia Upcoming screen with image backgrounds" width="260"> | <img src="Screenshots/02-photo-backgrounds.png" alt="Anticia personal photo backgrounds" width="260"> | <img src="Screenshots/03-text-colors.png" alt="Anticia background samples and text color customization" width="260"> |
+
+| 04. Home Screen widgets | 05. Calendar | 06. Timeline |
+| ----------------------- | ------------ | ------------ |
+| <img src="Screenshots/04-widget-home-screen.png" alt="Anticia Home Screen widgets with image backgrounds" width="260"> | <img src="Screenshots/05-calendar.png" alt="Anticia Calendar screen" width="260"> | <img src="Screenshots/06-timeline.png" alt="Anticia Timeline screen" width="260"> |
+
+| 07. Lock Screen widgets |
+| ----------------------- |
+| <img src="Screenshots/07-widget-lock-screen.png" alt="Anticia Lock Screen widgets" width="260"> |
 
 ## Features
 
