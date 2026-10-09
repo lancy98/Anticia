@@ -14,7 +14,9 @@ Install Anticia from the App Store to track events, trips, birthdays, deadlines,
 
 ## Screenshots
 
-Recommended App Store upload order is shown below and matches the numbered filenames. All seven screenshots are opaque PNGs at 1284 × 2778 pixels.
+Recommended App Store upload order is shown below and matches the numbered filenames. All seven screenshots in [Screenshots](Screenshots/) are opaque sRGB PNGs at **1206 × 2622 pixels**, sized for the **iPhone with Dynamic Island (medium display)** slot in App Store Connect.
+
+Select that display slot, click **Upload**, choose the seven PNGs directly inside `Screenshots/`, and arrange them from `01` to `07`. See [Apple’s screenshot specifications](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications).
 
 | 01. Upcoming | 02. Photo backgrounds | 03. Text colors |
 | ------------ | --------------------- | --------------- |
